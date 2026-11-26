@@ -1,9 +1,11 @@
 local Device            = require("device")
 local Event             = require("ui/event")
+local InfoMessage       = require("ui/widget/infomessage")
 local Setting           = require("lib/setting")
 local ThemeWatcher      = require("lib/themewatcher")
 local UIManager         = require("ui/uimanager")
 local common            = require("lib/common")
+local logger            = require("logger")
 local nf_icons          = require("lib/nf_icons")
 
 -- Settings
@@ -21,6 +23,18 @@ end
 local function start_themewatcher()
     ThemeWatcher:start(function(is_dark)
         apply_night_mode(is_dark)
+    end, function(had_worked)
+        -- Stay silent if it never worked (no portal on this setup). Warn only
+        -- when a previously working watcher died. The setting stays on, so the
+        -- next launch retries.
+        if not had_worked then
+            logger.warn("ThemeWatcher: gave up, desktop portal unreachable")
+            return
+        end
+        UIManager:show(InfoMessage:new{
+            text = _("System theme detection stopped: couldn't reach the desktop portal."),
+            timeout = 5,
+        })
     end)
 end
 
