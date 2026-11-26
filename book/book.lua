@@ -13,6 +13,7 @@ local logger = require("logger")
 local nf_icons = require("lib/nf_icons")
 local progress_bar_colors_menu = require("book/progress_bar_colors")
 local progress_bar_roundness_menu = require("book/progress_bar_roundness")
+local hooks = require("lib/hooks")
 local _ = require("gettext")
 
 local function refreshCSS()
@@ -52,10 +53,7 @@ local function redrawPage()
 end
 
 -- Hook into night mode state changes and refresh page
-local original_UIManager_ToggleNightMode = UIManager.ToggleNightMode
-function UIManager:ToggleNightMode(night_mode)
-    original_UIManager_ToggleNightMode(self, night_mode)
-
+hooks.register("ToggleNightMode", function(self, night_mode)
     if common.has_document_open() then
         recomputeAllColors()
 
@@ -64,7 +62,7 @@ function UIManager:ToggleNightMode(night_mode)
             redrawPage()
         end
     end
-end
+end)
 
 -- Only refresh page on applying a book theme in the reader
 local original_ReaderUI_onApplyTheme = ReaderUI.onApplyTheme

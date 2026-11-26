@@ -12,6 +12,7 @@ local font_face_menu = require("ui/font_face")
 local dict_font_face_menu = require("ui/dict_font_face")
 local nf_icons = require("lib/nf_icons")
 local transparency_menu = require("ui/transparency")
+local hooks = require("lib/hooks")
 local _ = require("gettext")
 
 local function ui_menu()
@@ -36,16 +37,13 @@ local function recomputeAllColors()
 end
 
 -- Hook into night mode state changes and refresh page
-local original_UIManager_ToggleNightMode = UIManager.ToggleNightMode
-function UIManager:ToggleNightMode(night_mode)
-    original_UIManager_ToggleNightMode(self, night_mode)
-
+hooks.register("ToggleNightMode", function(self, night_mode)
     recomputeAllColors()
 
     if background_color.needsFileManagerRefresh(true) or font_color.needsFileManagerRefresh(true) then
         common.refreshFileManager()
     end
-end
+end)
 
 local original_FileManager_onApplyTheme = FileManager.onApplyTheme
 function FileManager:onApplyTheme()

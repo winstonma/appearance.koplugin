@@ -37,6 +37,7 @@ local logger                  = require("logger")
 local nf_icons                = require("lib/nf_icons")
 local userpatch               = require("userpatch")
 local util                    = require("util")
+local hooks                   = require("lib/hooks")
 
 -- Settings
 local HexBackgroundColor      = Setting("ui_background_color_hex", "#FFFFFF")           -- RGB hex for UI background color (default: #FFFFFF)
@@ -889,14 +890,11 @@ function ReaderUI:onRecomputeAllColors()
 end
 
 -- Hook into night mode state changes and update cache
-local original_UIManager_ToggleNightMode = UIManager.ToggleNightMode
-function UIManager:ToggleNightMode(night_mode)
-    original_UIManager_ToggleNightMode(self, night_mode)
-
+hooks.register("ToggleNightMode", function(self, night_mode)
     if bg_cached.alt_night_color or not bg_cached.invert_in_night_mode or get_tint_icons() then
         ImageCache:clear()
     end
-end
+end)
 
 -- Replace UnderlineContainer painting
 function UnderlineContainer:paintTo(bb, x, y)

@@ -16,6 +16,7 @@ local lfs                    = require("libs/libkoreader-lfs")
 local logger                 = require("logger")
 local nf_icons               = require("lib/nf_icons")
 local pic                    = require("ffi/pic")
+local hooks                  = require("lib/hooks")
 
 local MAX_HISTORY_SIZE       = 20
 
@@ -475,13 +476,11 @@ function ReaderMenu:onShowMenu(tab_index, do_not_show)
 end
 
 -- Hook into night mode state changes and reload background image
-local original_UIManager_ToggleNightMode = UIManager.ToggleNightMode
-function UIManager:ToggleNightMode(night_mode)
-    original_UIManager_ToggleNightMode(self, night_mode)
+hooks.register("ToggleNightMode", function(self, night_mode)
     if BackgroundImage.get() and (FileManager.instance and ShowInFiles.get() or ReaderUI.instance and ShowInReader.get()) then
         reload_background_image()
     end
-end
+end)
 
 -- Reload background image on dimension changes (window resizing)
 local original_FileManager_onSetDimensions = FileManager.onSetDimensions
